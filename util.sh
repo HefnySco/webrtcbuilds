@@ -119,7 +119,9 @@ function checkout() {
   local target_os="$1"
   local outdir="$2"
   local revision="$3"
-
+  
+ 
+  
   pushd $outdir >/dev/null
   local prev_target_os=$(cat $outdir/.webrtcbuilds_target_os 2>/dev/null)
   if [[ -n "$prev_target_os" && "$target_os" != "$prev_target_os" ]]; then
@@ -141,6 +143,9 @@ function checkout() {
     esac
   fi
   # Checkout the specific revision after fetch
+  
+  python $outdir/src/setup_links.py --force
+
   gclient sync --force --revision $revision
   # Cache the target OS
   echo $target_os > $outdir/.webrtcbuilds_target_os
@@ -230,8 +235,11 @@ function compile() {
   local outdir="$2"
   local target_os="$3"
   local target_cpu="$4"
-  local common_args="is_component_build=false rtc_include_tests=false"
+  local build_args="$5"
+  local common_args="is_component_build=false rtc_include_tests=false $build_args"
   local target_args="target_os=\"$target_os\" target_cpu=\"$target_cpu\""
+  echo $target_args 
+ 
 
   pushd $outdir/src >/dev/null
   case $platform in

@@ -24,20 +24,27 @@ OPTIONS:
    -r REVISION    Git SHA revision. Default is latest revision.
    -t TARGET OS   The target os for cross-compilation. Default is the host OS such as 'linux', 'mac', 'win'. Other values can be 'android', 'ios'.
    -c TARGET CPU  The target cpu for cross-compilation. Default is 'x64'. Other values can be 'x86', 'arm64', 'arm'.
+   -g BUILD_ARGS   e.g. build_with_chromium=0 use_gtk=0 use_x11=0 include_internal_video_render=1 include_pulse_audio=0.
 EOF
 }
 
-while getopts :b:o:r:t:c:d OPTION; do
+BUILD_ARGS="build_with_chromium=0 use_gtk=0 use_x11=0 include_internal_video_render=0 include_pulse_audio=0"
+
+while getopts :b:o:r:t:c:d:g:a: OPTION; do
   case $OPTION in
   o) OUTDIR=$OPTARG ;;
   b) BRANCH=$OPTARG ;;
   r) REVISION=$OPTARG ;;
   t) TARGET_OS=$OPTARG ;;
   c) TARGET_CPU=$OPTARG ;;
+  g) BUILD_ARGS=$OPTARG ;;
   d) DEBUG=1 ;;
-  ?) usage; exit 1 ;;
+  a) ACTION=$OPTARG ;;
+  ?) usage exit 0 ;;
   esac
 done
+
+
 
 OUTDIR=${OUTDIR:-out}
 BRANCH=${BRANCH:-}
@@ -48,6 +55,8 @@ DEPOT_TOOLS_URL="https://chromium.googlesource.com/chromium/tools/depot_tools.gi
 DEPOT_TOOLS_DIR=$DIR/depot_tools
 DEPOT_TOOLS_WIN_TOOLCHAIN=0
 PATH=$DEPOT_TOOLS_DIR:$DEPOT_TOOLS_DIR/python276_bin:$PATH
+
+
 
 [ "$DEBUG" = 1 ] && set -x
 
@@ -62,10 +71,10 @@ echo "Target OS: $TARGET_OS"
 echo "Target CPU: $TARGET_CPU"
 
 echo Checking webrtcbuilds dependencies
-check::webrtcbuilds::deps $PLATFORM
+#check::webrtcbuilds::deps $PLATFORM
 
 echo Checking depot-tools
-check::depot-tools $PLATFORM $DEPOT_TOOLS_URL $DEPOT_TOOLS_DIR
+#check::depot-tools $PLATFORM $DEPOT_TOOLS_URL $DEPOT_TOOLS_DIR
 
 if [ ! -z $BRANCH ]; then
   REVISION=$(git ls-remote $REPO_URL --heads $BRANCH | head --lines 1 | cut --fields 1) || \
@@ -81,16 +90,16 @@ REVISION_NUMBER=$(revision-number $REPO_URL $REVISION) || \
 echo "Associated revision number: $REVISION_NUMBER"
 
 echo "Checking out WebRTC revision (this will take awhile): $REVISION"
-checkout "$TARGET_OS" $OUTDIR $REVISION
+#checkout "$TARGET_OS" $OUTDIR $REVISION
 
 echo Checking WebRTC dependencies
-check::webrtc::deps $PLATFORM $OUTDIR "$TARGET_OS"
+#check::webrtc::deps $PLATFORM $OUTDIR "$TARGET_OS"
 
 echo Patching WebRTC source
-patch $PLATFORM $OUTDIR
+#patch $PLATFORM $OUTDIR
 
 echo Compiling WebRTC
-compile $PLATFORM $OUTDIR "$TARGET_OS" "$TARGET_CPU"
+compile $PLATFORM $OUTDIR "$TARGET_OS" "$TARGET_CPU" "$BUILD_ARGS"
 
 echo Packaging WebRTC
 # label is <projectname>-<rev-number>-<short-rev-sha>-<target-os>-<target-cpu>
