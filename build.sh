@@ -39,7 +39,6 @@ while getopts :b:o:r:t:c:d:g:a: OPTION; do
   c) TARGET_CPU=$OPTARG ;;
   g) BUILD_ARGS=$OPTARG ;;
   d) DEBUG=1 ;;
-  a) ACTION=$OPTARG ;;
   ?) usage exit 0 ;;
   esac
 done
@@ -71,10 +70,10 @@ echo "Target OS: $TARGET_OS"
 echo "Target CPU: $TARGET_CPU"
 
 echo Checking webrtcbuilds dependencies
-#check::webrtcbuilds::deps $PLATFORM
+check::webrtcbuilds::deps $PLATFORM
 
 echo Checking depot-tools
-#check::depot-tools $PLATFORM $DEPOT_TOOLS_URL $DEPOT_TOOLS_DIR
+check::depot-tools $PLATFORM $DEPOT_TOOLS_URL $DEPOT_TOOLS_DIR
 
 if [ ! -z $BRANCH ]; then
   REVISION=$(git ls-remote $REPO_URL --heads $BRANCH | head --lines 1 | cut --fields 1) || \
@@ -90,13 +89,13 @@ REVISION_NUMBER=$(revision-number $REPO_URL $REVISION) || \
 echo "Associated revision number: $REVISION_NUMBER"
 
 echo "Checking out WebRTC revision (this will take awhile): $REVISION"
-#checkout "$TARGET_OS" $OUTDIR $REVISION
+checkout "$TARGET_OS" $OUTDIR $REVISION
 
 echo Checking WebRTC dependencies
-#check::webrtc::deps $PLATFORM $OUTDIR "$TARGET_OS"
+check::webrtc::deps $PLATFORM $OUTDIR "$TARGET_OS"
 
 echo Patching WebRTC source
-#patch $PLATFORM $OUTDIR
+patch $PLATFORM $OUTDIR
 
 echo Compiling WebRTC
 compile $PLATFORM $OUTDIR "$TARGET_OS" "$TARGET_CPU" "$BUILD_ARGS"
