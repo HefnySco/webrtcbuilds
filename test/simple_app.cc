@@ -21,21 +21,7 @@
 // #endif
 
 
-class VideoPacketSource : public cricket::VideoCapturer
-{
-public:
-    VideoPacketSource()
-    {
-        std::vector<cricket::VideoFormat> formats;
-        SetSupportedFormats(formats);
-    }
-    
-    virtual cricket::CaptureState Start(const cricket::VideoFormat& capture_format) override { return cricket::CS_RUNNING; }
-    virtual void Stop() override {};
-    virtual bool GetPreferredFourccs(std::vector<uint32_t>* fourccs) override { return true; };
-    virtual bool IsRunning() override { return true; };
-    virtual bool IsScreencast() const override { return false; };
-};
+
 
 
 int main(int argc, char* argv[]) {

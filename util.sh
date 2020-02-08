@@ -268,10 +268,11 @@ function compile::ninja() {
   local gn_args="$2"
 
   echo "Generating project files with: $gn_args"
+  echo gn gen $outputdir --args="$gn_args"
   gn gen $outputdir --args="$gn_args"
   pushd $outputdir >/dev/null
     # ninja -v -C  .
-    ninja -C  .
+    ninja -v -C  .
   popd >/dev/null
 }
 
@@ -483,7 +484,8 @@ function package::prepare() {
 
     # Create directory structure
     mkdir -p $package_filename/include packages
-    pushd src >/dev/null
+    #pushd src >/dev/null
+    pushd src 
 
       # Find and copy header files
       local header_source_dir=webrtc
@@ -504,12 +506,14 @@ function package::prepare() {
         grep -E 'boringssl|expat/files|jsoncpp/source/json|libjpeg|libjpeg_turbo|libsrtp|libyuv|libvpx|opus|protobuf|usrsctp/usrsctpout/usrsctpout' | \
         xargs -I '{}' $CP --parents '{}' $outdir/$package_filename/include
 
-    popd >/dev/null
+    #popd >/dev/null
+    popd
 
     # Find and copy libraries
     for cfg in $configs; do
       mkdir -p $package_filename/lib/$TARGET_CPU/$cfg
-      pushd src/out/$TARGET_CPU/$cfg >/dev/null
+      #pushd src/out/$TARGET_CPU/$cfg >/dev/null
+      pushd src/out/$TARGET_CPU/$cfg 
         mkdir -p $outdir/$package_filename/lib/$TARGET_CPU/$cfg
         if [ $COMBINE_LIBRARIES = 1 ]; then
           find . -name '*.so' -o -name '*.dll' -o -name '*.lib' -o -name '*.a' -o -name '*.jar' | \
@@ -520,7 +524,9 @@ function package::prepare() {
             grep -E 'webrtc\.|boringssl|protobuf|system_wrappers' | \
             xargs -I '{}' $CP '{}' $outdir/$package_filename/lib/$TARGET_CPU/$cfg
         fi
-      popd >/dev/null
+      #popd >/dev/null
+      popd
+
     done
 
     # Create pkgconfig files on linux
@@ -532,7 +538,9 @@ function package::prepare() {
       done
     fi
 
-  popd >/dev/null
+  #popd >/dev/null
+  popd
+
 }
 
 # This packages a compiled build into a archive file in the output directory.
